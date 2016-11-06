@@ -81911,6 +81911,7 @@ var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
 
 var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
 
+
 var _Main=require(864 /* ./Main */);var _Main2=babelHelpers.interopRequireDefault(_Main);
 var _Welcome=require(865 /* ./Welcome */);var _Welcome2=babelHelpers.interopRequireDefault(_Welcome);
 var _CreateGroup=require(866 /* ./CreateGroup */);var _CreateGroup2=babelHelpers.interopRequireDefault(_CreateGroup);
@@ -81921,10 +81922,10 @@ App=function(_Component){babelHelpers.inherits(App,_Component);function App(){ba
 return(
 _react2.default.createElement(_reactNativeRouterFlux.Router,null,
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'root',hideNavBar:true},
-_react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'welcome',component:_Welcome2.default,initial:true}),
+_react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'welcome',component:_Welcome2.default,initial:true,panHandlers:null}),
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'createGroup',component:_CreateGroup2.default}),
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'joinGroup',component:_JoinGroup2.default}),
-_react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'main',component:_Main2.default}))));
+_react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'main',component:_Main2.default,panHandlers:null}))));
 
 
 
@@ -95822,6 +95823,8 @@ var _reactNative=require(44 /* react-native */);
 
 var _reactNativeMaps=require(653 /* react-native-maps */);var _reactNativeMaps2=babelHelpers.interopRequireDefault(_reactNativeMaps);
 var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
+var _reactNativeSideMenu=require(868 /* react-native-side-menu */);var _reactNativeSideMenu2=babelHelpers.interopRequireDefault(_reactNativeSideMenu);
+
 
 var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
 
@@ -95829,8 +95832,8 @@ var styles=_reactNative.StyleSheet.create({
 container:babelHelpers.extends({},
 _reactNative.StyleSheet.absoluteFillObject,{
 flex:1,
-justifyContent:'flex-end',
-alignItems:'center'}),
+alignItems:'center',
+padding:10}),
 
 map:babelHelpers.extends({},
 _reactNative.StyleSheet.absoluteFillObject)});var
@@ -95843,7 +95846,9 @@ props));
 _this.state={
 users:{},
 lat:_this.props.lat,
-lon:_this.props.lon};
+lon:_this.props.lon,
+panic:false,
+status:""};
 
 _this.update=_this.update.bind(_this);
 _this.updateGroup=_this.updateGroup.bind(_this);
@@ -95853,6 +95858,13 @@ setInterval(_this.updateGroup,60000);return _this;
 
 {
 this.updateGroup();
+}},{key:'shouldComponentUpdate',value:function shouldComponentUpdate(
+
+nextProps,nextState){
+if(this.state.status!==nextState.status){
+return false;
+}
+return true;
 }},{key:'update',value:function update()
 
 {var _this2=this;
@@ -95894,14 +95906,55 @@ then(function(response){return JSON.parse(response._bodyInit);}).
 then(function(data){return _this3.setState({users:data});}).
 catch(function(e){return console.warn("here",JSON.stringify(e));}).
 done();
+}},{key:'panic',value:function panic()
+
+{
+var p=this.state.panic;
+this.setState({panic:!p});
+fetch("http://rallyserver.herokuapp.com/update_panic",{
+method:"POST",
+headers:{
+'Accept':'application/json',
+'Content-Type':'application/json'},
+
+body:JSON.stringify({
+groupname:this.props.groupname,
+username:this.props.username})});
+
+
+}},{key:'updateStatus',value:function updateStatus()
+
+{
+fetch("http://rallyserver.herokuapp.com/update_status",{
+method:"POST",
+headers:{
+'Accept':'application/json',
+'Content-Type':'application/json'},
+
+body:JSON.stringify({
+groupname:this.props.groupname,
+username:this.props.username,
+status:this.state.status})}).
+
+
+done();
+this.setState({status:""});
 }},{key:'render',value:function render()
 
 {var _this4=this;
+var menu=
+_react2.default.createElement(_reactNative.View,null,
+_react2.default.createElement(_reactNative.Text,null,'Need help? Let people know!'),
+_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:this.state.panic?"I am ok!":"Send Help!",raised:true,onPress:function onPress(){return _this4.panic();}}),
+_react2.default.createElement(_reactNativeMaterialDesign.Divider,null),
+_react2.default.createElement(_reactNative.TextInput,{placeholder:'What\'s your status?',onChangeText:function onChangeText(event){return _this4.setState({status:event});}}),
+_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Update my status.',raised:true,onPress:function onPress(){return _this4.updateStatus();}}));
+
+
+
 return(
+_react2.default.createElement(_reactNativeSideMenu2.default,{menu:menu},
 _react2.default.createElement(_reactNative.View,{style:styles.container},
-_react2.default.createElement(_reactNative.ToolbarAndroid,{
-title:'Rally!',
-actions:[{title:'Settings',show:'always'}]}),
 _react2.default.createElement(_reactNativeMaps2.default,{
 style:styles.map,
 region:{
@@ -95918,6 +95971,14 @@ description:'You are here.',
 pinColor:'ffff22'}),
 
 Object.keys(this.state.users).map(function(user){
+if(user!==_this4.props.username&&_this4.state.users[user].panic){
+return _react2.default.createElement(_reactNativeMaps2.default.Marker,{
+coordinate:{latitude:_this4.state.users[user].lat,longitude:_this4.state.users[user].lon},
+title:user,
+description:_this4.state.users[user].status,
+image:require(870 /* ./panic.png */)});
+
+}else
 if(user!==_this4.props.username){
 return _react2.default.createElement(_reactNativeMaps2.default.Marker,{
 coordinate:{latitude:_this4.state.users[user].lat,longitude:_this4.state.users[user].lon},
@@ -95925,13 +95986,337 @@ title:user,
 description:_this4.state.users[user].status});
 
 }
-}))));
+})))));
+
+
 
 
 
 
 }}]);return Main;}(_react.Component);exports.default=Main;
 }, "rally/src/Main.js");
+__d(868 /* react-native-side-menu/index.js */, function(global, require, module, exports) {
+var styles=require(869 /* ./styles */);
+var ReactNative=require(44 /* react-native */);
+var React=require(12 /* react */);var
+Dimensions=ReactNative.Dimensions,Animated=ReactNative.Animated;
+var deviceScreen=Dimensions.get('window');var
+
+
+PanResponder=
+
+
+ReactNative.PanResponder,View=ReactNative.View,TouchableWithoutFeedback=ReactNative.TouchableWithoutFeedback;
+
+
+
+
+
+
+var barrierForward=deviceScreen.width/4;
+
+
+
+
+
+
+
+function shouldOpenMenu(dx){
+return dx>barrierForward;
+}var
+
+SideMenu=function(_React$Component){babelHelpers.inherits(SideMenu,_React$Component);
+function SideMenu(props){babelHelpers.classCallCheck(this,SideMenu);var _this=babelHelpers.possibleConstructorReturn(this,(SideMenu.__proto__||Object.getPrototypeOf(SideMenu)).call(this,
+props));
+
+
+
+
+
+
+_this.prevLeft=0;
+_this.isOpen=props.isOpen;
+
+var initialMenuPositionMultiplier=props.menuPosition==='right'?-1:1;
+var openOffsetMenuPercentage=props.openMenuOffset/deviceScreen.width;
+var hiddenMenuOffsetPercentage=props.hiddenMenuOffset/deviceScreen.width;
+
+_this.state={
+width:deviceScreen.width,
+height:deviceScreen.height,
+openOffsetMenuPercentage:openOffsetMenuPercentage,
+openMenuOffset:deviceScreen.width*openOffsetMenuPercentage,
+hiddenMenuOffsetPercentage:hiddenMenuOffsetPercentage,
+hiddenMenuOffset:deviceScreen.width*hiddenMenuOffsetPercentage,
+left:new Animated.Value(
+props.isOpen?props.openMenuOffset*initialMenuPositionMultiplier:props.hiddenMenuOffset)};return _this;
+
+
+}babelHelpers.createClass(SideMenu,[{key:'componentWillMount',value:function componentWillMount()
+
+
+
+
+
+{
+this.responder=PanResponder.create({
+onStartShouldSetResponderCapture:this.props.onStartShouldSetResponderCapture.bind(this),
+onMoveShouldSetPanResponder:this.handleMoveShouldSetPanResponder.bind(this),
+onPanResponderMove:this.handlePanResponderMove.bind(this),
+onPanResponderRelease:this.handlePanResponderEnd.bind(this)});
+
+}},{key:'componentWillReceiveProps',value:function componentWillReceiveProps(
+
+props){
+if(this.isOpen!==props.isOpen){
+this.openMenu(props.isOpen);
+}
+}},{key:'gesturesAreEnabled',value:function gesturesAreEnabled()
+
+
+
+
+
+{var
+disableGestures=this.props.disableGestures;
+
+if(typeof disableGestures==='function'){
+return!disableGestures();
+}
+
+return!disableGestures;
+}},{key:'handleMoveShouldSetPanResponder',value:function handleMoveShouldSetPanResponder(
+
+
+
+
+
+e,gestureState){
+if(this.gesturesAreEnabled()){
+var x=Math.round(Math.abs(gestureState.dx));
+var y=Math.round(Math.abs(gestureState.dy));
+
+var touchMoved=x>this.props.toleranceX&&y<this.props.toleranceY;
+
+if(this.isOpen){
+return touchMoved;
+}
+
+var withinEdgeHitWidth=this.props.menuPosition==='right'?
+gestureState.moveX>deviceScreen.width-this.props.edgeHitWidth:
+gestureState.moveX<this.props.edgeHitWidth;
+
+var swipingToOpen=this.menuPositionMultiplier()*gestureState.dx>0;
+return withinEdgeHitWidth&&touchMoved&&swipingToOpen;
+}
+
+return false;
+}},{key:'handlePanResponderMove',value:function handlePanResponderMove(
+
+
+
+
+
+
+
+e,gestureState){
+if(this.state.left.__getValue()*this.menuPositionMultiplier()>=0){
+var newLeft=this.prevLeft+gestureState.dx;
+
+if(!this.props.bounceBackOnOverdraw&&Math.abs(newLeft)>this.state.openMenuOffset){
+newLeft=this.menuPositionMultiplier()*this.state.openMenuOffset;
+}
+
+this.props.onMove(newLeft);
+this.state.left.setValue(newLeft);
+}
+}},{key:'handlePanResponderEnd',value:function handlePanResponderEnd(
+
+
+
+
+
+
+
+e,gestureState){
+var offsetLeft=this.menuPositionMultiplier()*(
+this.state.left.__getValue()+gestureState.dx);
+
+this.openMenu(shouldOpenMenu(offsetLeft));
+}},{key:'menuPositionMultiplier',value:function menuPositionMultiplier()
+
+
+
+
+
+{
+return this.props.menuPosition==='right'?-1:1;
+}},{key:'moveLeft',value:function moveLeft(
+
+offset){
+var newOffset=this.menuPositionMultiplier()*offset;
+
+this.props.
+animationFunction(this.state.left,newOffset).
+start();
+
+this.prevLeft=newOffset;
+}},{key:'openMenu',value:function openMenu(
+
+
+
+
+
+isOpen){var _state=
+this.state,hiddenMenuOffset=_state.hiddenMenuOffset,openMenuOffset=_state.openMenuOffset;
+this.moveLeft(isOpen?openMenuOffset:hiddenMenuOffset);
+this.isOpen=isOpen;
+
+this.forceUpdate();
+this.props.onChange(isOpen);
+}},{key:'getContentView',value:function getContentView()
+
+
+
+
+
+{var _this2=this;
+var overlay=null;
+
+if(this.isOpen){
+overlay=
+React.createElement(TouchableWithoutFeedback,{onPress:function onPress(){return _this2.openMenu(false);}},
+React.createElement(View,{style:styles.overlay}));
+
+
+}var _state2=
+
+this.state,width=_state2.width,height=_state2.height;
+var ref=function ref(sideMenu){return _this2.sideMenu=sideMenu;};
+var style=[
+styles.frontView,
+{width:width,height:height},
+this.props.animationStyle(this.state.left)];
+
+
+return(
+React.createElement(Animated.View,babelHelpers.extends({style:style,ref:ref},this.responder.panHandlers),
+this.props.children,
+overlay));
+
+
+}},{key:'onLayoutChange',value:function onLayoutChange(
+
+e){var _e$nativeEvent$layout=
+e.nativeEvent.layout,width=_e$nativeEvent$layout.width,height=_e$nativeEvent$layout.height;
+var openMenuOffset=width*this.state.openOffsetMenuPercentage;
+var hiddenMenuOffset=width*this.state.hiddenMenuOffsetPercentage;
+this.setState({width:width,height:height,openMenuOffset:openMenuOffset,hiddenMenuOffset:hiddenMenuOffset});
+}},{key:'render',value:function render()
+
+
+
+
+
+{
+
+var boundryStyle=this.props.menuPosition=='right'?
+{left:this.state.width-this.state.openMenuOffset}:
+{right:this.state.width-this.state.openMenuOffset};
+
+var menu=React.createElement(View,{style:[styles.menu,boundryStyle]},this.props.menu);
+
+return(
+React.createElement(View,{style:styles.container,onLayout:this.onLayoutChange.bind(this)},
+menu,
+this.getContentView()));
+
+
+}}]);return SideMenu;}(React.Component);
+
+
+SideMenu.propTypes={
+edgeHitWidth:React.PropTypes.number,
+toleranceX:React.PropTypes.number,
+toleranceY:React.PropTypes.number,
+menuPosition:React.PropTypes.oneOf(['left','right']),
+onChange:React.PropTypes.func,
+onMove:React.PropTypes.func,
+openMenuOffset:React.PropTypes.number,
+hiddenMenuOffset:React.PropTypes.number,
+disableGestures:React.PropTypes.oneOfType([React.PropTypes.func,React.PropTypes.bool]),
+animationFunction:React.PropTypes.func,
+onStartShouldSetResponderCapture:React.PropTypes.func,
+isOpen:React.PropTypes.bool,
+bounceBackOnOverdraw:React.PropTypes.bool};
+
+
+SideMenu.defaultProps={
+toleranceY:10,
+toleranceX:10,
+edgeHitWidth:60,
+openMenuOffset:deviceScreen.width*2/3,
+hiddenMenuOffset:0,
+onMove:function onMove(){},
+onStartShouldSetResponderCapture:function onStartShouldSetResponderCapture(){return true;},
+onChange:function onChange(){},
+animationStyle:function animationStyle(value){
+return{
+transform:[{
+translateX:value}]};
+
+
+},
+animationFunction:function animationFunction(prop,value){
+return Animated.spring(
+prop,
+{
+toValue:value,
+friction:8});
+
+
+},
+isOpen:false,
+bounceBackOnOverdraw:true};
+
+
+module.exports=SideMenu;
+}, "react-native-side-menu/index.js");
+__d(869 /* react-native-side-menu/styles.js */, function(global, require, module, exports) {var React=require(44 /* react-native */);var
+
+
+StyleSheet=
+React.StyleSheet;
+
+var absoluteStretch={
+position:'absolute',
+top:0,
+left:0,
+bottom:0,
+right:0};
+
+
+module.exports=StyleSheet.create({
+container:babelHelpers.extends({},
+absoluteStretch,{
+justifyContent:'center'}),
+
+menu:babelHelpers.extends({},
+absoluteStretch),
+
+frontView:{
+flex:1,
+position:'absolute',
+left:0,
+top:0,
+backgroundColor:'transparent'},
+
+overlay:babelHelpers.extends({},
+absoluteStretch,{
+backgroundColor:'transparent'})});
+}, "react-native-side-menu/styles.js");
+__d(870 /* rally/src/panic.png */, function(global, require, module, exports) {module.exports = require(172 /* react-native/Libraries/Image/AssetRegistry */).registerAsset({"__packager_asset":true,"httpServerLocation":"/assets/src","width":512,"height":512,"scales":[1],"hash":"04257379974b0fed39052382d14a9b0b","name":"panic","type":"png"});
+}, "rally/src/panic.png");
 __d(865 /* rally/src/Welcome.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 var _reactNative=require(44 /* react-native */);
 

@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  TextInput
 } from 'react-native';
 import MapView from 'react-native-maps'
-import { Button } from 'react-native-material-design'
+import { Button, Divider } from 'react-native-material-design'
+import SideMenu from 'react-native-side-menu'
+
 
 import { Router, Scene, Actions } from 'react-native-router-flux'
 
@@ -13,8 +16,8 @@ const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     flex: 1,
-    justifyContent: 'flex-end',
     alignItems: 'center',
+    padding: 10
   },
   map: {
     ...StyleSheet.absoluteFillObject,
@@ -27,7 +30,9 @@ export default class Main extends Component {
     this.state = {
       users: {},
       lat: this.props.lat,
-      lon: this.props.lon
+      lon: this.props.lon,
+      panic: false,
+      status: ""
     };
     this.update = this.update.bind(this)
     this.updateGroup = this.updateGroup.bind(this)
@@ -37,6 +42,13 @@ export default class Main extends Component {
 
   componentDidMount() {
     this.updateGroup()
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.status !== nextState.status) {
+      return false
+    }
+    return true
   }
 
   update() {
@@ -80,8 +92,52 @@ export default class Main extends Component {
     .done()
   }
 
+  panic() {
+    var p = this.state.panic
+    this.setState({panic: !p})
+    fetch("http://rallyserver.herokuapp.com/update_panic", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        groupname: this.props.groupname,
+        username: this.props.username
+      })
+    })
+  }
+
+  updateStatus() {
+    fetch("http://rallyserver.herokuapp.com/update_status", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        groupname: this.props.groupname,
+        username: this.props.username,
+        status: this.state.status
+      })
+    })
+    .done()
+    this.setState({status: ""})
+  }
+
  render() {
+   var menu = (
+     <View>
+        <Text>Need help? Let people know!</Text>
+        <Button text={this.state.panic ? "I am ok!" : "Send Help!"} raised={true} onPress={()=> this.panic()} />
+        <Divider />
+        <TextInput placeholder="What's your status?" onChangeText={(event) => this.setState({status: event})} />
+        <Button text="Update my status." raised={true} onPress={()=> this.updateStatus()} />
+     </View>
+   )
+
    return (
+     <SideMenu menu={menu}>
      <View style={styles.container}>
        <MapView
          style={styles.map}
@@ -99,17 +155,27 @@ export default class Main extends Component {
               pinColor="ffff22"
             />
           {Object.keys(this.state.users).map(user => {
-              if (user !== this.props.username) {
+              if (user !== this.props.username && this.state.users[user].panic) {
               return (<MapView.Marker
                 coordinate={{latitude: this.state.users[user].lat, longitude: this.state.users[user].lon}}
                 title={user}
                 description={this.state.users[user].status}
+                image={require('./panic.png')}
               />)
-            }
-            }
+              }
+              else if (user !== this.props.username) {
+                return (<MapView.Marker
+                  coordinate={{latitude: this.state.users[user].lat, longitude: this.state.users[user].lon}}
+                  title={user}
+                  description={this.state.users[user].status}
+                />)
+              }
+              }
             )}
        </MapView>
      </View>
+   </SideMenu>
+
    );
  }
 }
