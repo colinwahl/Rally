@@ -11,6 +11,38 @@ import { Button, Card } from 'react-native-material-design'
 import { Actions } from 'react-native-router-flux'
 
 const styles = StyleSheet.create({
+  enter:{
+    backgroundColor:'white',
+    justifyContent:'center',
+    borderColor: '#6ed3cf',
+
+    borderWidth: 1,
+    margin:5
+
+  },
+  title:{
+    fontFamily: 'verdana',
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+    color: '#e62739',
+    fontSize: 60,
+  },
+  header:{
+        flex:1,
+        alignItems:'center',
+        backgroundColor: '#e1e8f0',
+        justifyContent:'center'
+  },
+  createContainer:{
+    flex:2,
+//    alignItems: 'center',
+    backgroundColor: '#e1e8f0',
+    justifyContent:'flex-start'
+  },
+  button:{
+   marginLeft:40,
+   marginRight:40
+  },
   container: {
     ...StyleSheet.absoluteFillObject,
     flex: 1,
@@ -72,10 +104,17 @@ export default class JoinGroup extends Component {
 
   render() {
     return (
-      <View>
-        <TextInput placeholder="Enter the group name." onChangeText={(event) => this.setState({groupname: event})} />
-        <TextInput placeholder="Enter a user name." onChangeText={(event) => this.setState({username: event})} />
-        <Button text="Submit" raised={true} onPress={()=> this.sendData()} />
+      <View style={{flex:1}}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Join Group</Text>
+      </View>
+        <View style={styles.createContainer}>
+        <TextInput style={styles.enter} placeholder="Enter the group name." onChangeText={(event) => this.setState({groupname: event})} />
+        <TextInput style={styles.enter} placeholder="Enter a user name." onChangeText={(event) => this.setState({username: event})} />
+          <View style={styles.button}>
+          <Button text="Submit" theme="dark" raised={true} onPress={()=> this.sendData()} />
+          </View>
+      </View>
       </View>
     )
   }

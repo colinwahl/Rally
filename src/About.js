@@ -17,14 +17,14 @@ const styles = StyleSheet.create({
    justifyContent:'center'
  },
  title: {
-  fontFamily: 'verdana',
-  fontStyle:'italic',
-  fontWeight: 'bold',
-  color: '#e62739',
-  fontSize: 100
+   fontFamily: 'verdana',
+   textDecorationLine: 'underline',
+   fontWeight: 'bold',
+   color: '#e62739',
+   fontSize: 60
  },
  subtitle: {
-   textAlign: 'center',
+
    color: '#6ed3cf'
  },
  triangle: {
@@ -42,16 +42,12 @@ const styles = StyleSheet.create({
       borderLeftColor: 'transparent',
     },
     buttons:{
-      flex:1,
+      flex:2,
       alignItems: 'center',
       backgroundColor: '#e1e8f0',
       justifyContent:'flex-start'
     },
     button1:{
-      margin: 10,
-      width:200
-    },
-    button2:{
       margin: 10,
       width:200
     },
@@ -75,27 +71,14 @@ const styles = StyleSheet.create({
 });
 
 
-export default class Welcome extends Component {
+export default class About extends Component {
 
   render() {
     return (
     <View style={{flex:1}}>
-      <View style={styles.welcomeContainer}>
-        <Text style={styles.title}>Rally</Text>
-        <View style={styles.triangle}/>
-      </View>
-
-      <View style={styles.buttons}>
-        <View style={styles.button1}>
-        <Button style={styles.button2} theme="dark" text="Create a Group" raised={true} onPress={()=> Actions.createGroup()} />
-        </View>
-        <View style={styles.button1}>
-        <Button style={styles.button1} theme="dark" text="Join a Group" raised={true} onPress={()=> Actions.joinGroup()} />
-        </View>
-        <View style={styles.button1}>
-        <Text style={styles.subtitle} onPress={()=>Actions.about()}>About Us</Text>
-        </View>
-      </View>
+    <View style={styles.welcomeContainer}>
+        <Text style={styles.title}>About Us</Text>
+    </View>
     </View>
     )
   }

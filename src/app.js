@@ -15,6 +15,7 @@ import Main from "./Main"
 import Welcome from "./Welcome"
 import CreateGroup from "./CreateGroup"
 import JoinGroup from "./JoinGroup"
+import About from "./About"
 
 export default class App extends Component {
   render() {
@@ -24,6 +25,8 @@ export default class App extends Component {
           <Scene key="welcome" component={Welcome} initial={true} panHandlers={null} />
           <Scene key="createGroup" component={CreateGroup} />
           <Scene key="joinGroup" component={JoinGroup} />
+        
+          <Scene key="about" component={About}/>
           <Scene key="main" component={Main} panHandlers={null}  />
         </Scene>
       </Router>
