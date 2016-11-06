@@ -81915,7 +81915,8 @@ var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
 var _Main=require(864 /* ./Main */);var _Main2=babelHelpers.interopRequireDefault(_Main);
 var _Welcome=require(865 /* ./Welcome */);var _Welcome2=babelHelpers.interopRequireDefault(_Welcome);
 var _CreateGroup=require(866 /* ./CreateGroup */);var _CreateGroup2=babelHelpers.interopRequireDefault(_CreateGroup);
-var _JoinGroup=require(867 /* ./JoinGroup */);var _JoinGroup2=babelHelpers.interopRequireDefault(_JoinGroup);var
+var _JoinGroup=require(867 /* ./JoinGroup */);var _JoinGroup2=babelHelpers.interopRequireDefault(_JoinGroup);
+var _About=require(872 /* ./About */);var _About2=babelHelpers.interopRequireDefault(_About);var
 
 App=function(_Component){babelHelpers.inherits(App,_Component);function App(){babelHelpers.classCallCheck(this,App);return babelHelpers.possibleConstructorReturn(this,(App.__proto__||Object.getPrototypeOf(App)).apply(this,arguments));}babelHelpers.createClass(App,[{key:'render',value:function render()
 {
@@ -81925,6 +81926,8 @@ _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'root',hideNavBa
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'welcome',component:_Welcome2.default,initial:true,panHandlers:null}),
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'createGroup',component:_CreateGroup2.default}),
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'joinGroup',component:_JoinGroup2.default}),
+
+_react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'about',component:_About2.default}),
 _react2.default.createElement(_reactNativeRouterFlux.Scene,{key:'main',component:_Main2.default,panHandlers:null}))));
 
 
@@ -95821,6 +95824,7 @@ var _reactNative=require(44 /* react-native */);
 
 
 
+
 var _reactNativeMaps=require(653 /* react-native-maps */);var _reactNativeMaps2=babelHelpers.interopRequireDefault(_reactNativeMaps);
 var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
 var _reactNativeSideMenu=require(868 /* react-native-side-menu */);var _reactNativeSideMenu2=babelHelpers.interopRequireDefault(_reactNativeSideMenu);
@@ -95832,23 +95836,52 @@ var styles=_reactNative.StyleSheet.create({
 container:babelHelpers.extends({},
 _reactNative.StyleSheet.absoluteFillObject,{
 flex:1,
-alignItems:'center',
-padding:10}),
+padding:10,
+flexDirection:'column',
+backgroundColor:'#e1e9f0'}),
 
-map:babelHelpers.extends({},
-_reactNative.StyleSheet.absoluteFillObject)});var
+map:{
+flex:0.5,
+height:300},
+
+listview:{
+flex:0.5,
+height:300,
+paddingTop:20,
+paddingBottom:20},
+
+username:{
+fontSize:20,
+color:'black',
+fontWeight:'bold'},
+
+bordered:{
+borderColor:'#6ed3cf',
+borderWidth:5},
+
+menu:{
+padding:10},
+
+panic:{
+color:'#e62739',
+fontWeight:'bold'},
+
+name:{
+color:'#6ed3cf'}});var
 
 
 
 Main=function(_Component){babelHelpers.inherits(Main,_Component);
 function Main(props){babelHelpers.classCallCheck(this,Main);var _this=babelHelpers.possibleConstructorReturn(this,(Main.__proto__||Object.getPrototypeOf(Main)).call(this,
 props));
+_this.ds=new _reactNative.ListView.DataSource({rowHasChanged:function rowHasChanged(r1,r2){return r1!==r2;}});
 _this.state={
 users:{},
 lat:_this.props.lat,
 lon:_this.props.lon,
 panic:false,
-status:""};
+status:"",
+datasource:_this.ds.cloneWithRows([])};
 
 _this.update=_this.update.bind(_this);
 _this.updateGroup=_this.updateGroup.bind(_this);
@@ -95903,7 +95936,16 @@ groupname:this.props.groupname})}).
 
 
 then(function(response){return JSON.parse(response._bodyInit);}).
-then(function(data){return _this3.setState({users:data});}).
+then(function(data){
+var a=Object.keys(_this3.state.users).filter(function(user){return _this3.state.users[user].status!==""||_this3.state.users[user].panic;}).map(function(user){
+return{
+username:user,
+status:_this3.state.users[user].status,
+panic:_this3.state.users[user].panic};
+
+});
+_this3.setState({users:data,datasource:_this3.ds.cloneWithRows(a)});
+}).
 catch(function(e){return console.warn("here",JSON.stringify(e));}).
 done();
 }},{key:'panic',value:function panic()
@@ -95938,12 +95980,11 @@ status:this.state.status})}).
 
 
 done();
-this.setState({status:""});
 }},{key:'render',value:function render()
 
 {var _this4=this;
 var menu=
-_react2.default.createElement(_reactNative.View,null,
+_react2.default.createElement(_reactNative.View,{style:styles.menu},
 _react2.default.createElement(_reactNative.Text,null,'Need help? Let people know!'),
 _react2.default.createElement(_reactNativeMaterialDesign.Button,{text:this.state.panic?"I am ok!":"Send Help!",raised:true,onPress:function onPress(){return _this4.panic();}}),
 _react2.default.createElement(_reactNativeMaterialDesign.Divider,null),
@@ -95955,6 +95996,7 @@ _react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Update my
 return(
 _react2.default.createElement(_reactNativeSideMenu2.default,{menu:menu},
 _react2.default.createElement(_reactNative.View,{style:styles.container},
+_react2.default.createElement(_reactNative.View,{style:styles.bordered},
 _react2.default.createElement(_reactNativeMaps2.default,{
 style:styles.map,
 region:{
@@ -95968,17 +96010,9 @@ _react2.default.createElement(_reactNativeMaps2.default.Marker,{
 coordinate:{latitude:this.state.lat,longitude:this.state.lon},
 title:this.props.username,
 description:'You are here.',
-pinColor:'ffff22'}),
+pinColor:'#ffff22'}),
 
 Object.keys(this.state.users).map(function(user){
-if(user!==_this4.props.username&&_this4.state.users[user].panic){
-return _react2.default.createElement(_reactNativeMaps2.default.Marker,{
-coordinate:{latitude:_this4.state.users[user].lat,longitude:_this4.state.users[user].lon},
-title:user,
-description:_this4.state.users[user].status,
-image:require(870 /* ./panic.png */)});
-
-}else
 if(user!==_this4.props.username){
 return _react2.default.createElement(_reactNativeMaps2.default.Marker,{
 coordinate:{latitude:_this4.state.users[user].lat,longitude:_this4.state.users[user].lon},
@@ -95986,8 +96020,21 @@ title:user,
 description:_this4.state.users[user].status});
 
 }
-})))));
+}))),
 
+
+
+_react2.default.createElement(_reactNative.View,{style:styles.listview},
+_react2.default.createElement(_reactNative.Text,{style:styles.username},'Status Feed'),
+_react2.default.createElement(_reactNativeMaterialDesign.Divider,null),
+_react2.default.createElement(_reactNative.ListView,{
+dataSource:this.state.datasource,
+renderRow:function renderRow(user){
+if(user.panic){
+return _react2.default.createElement(_reactNative.View,null,_react2.default.createElement(_reactNative.Text,{style:styles.panic},user.username,' needs help!'),_react2.default.createElement(_reactNativeMaterialDesign.Divider,null));
+}
+return _react2.default.createElement(_reactNative.View,null,_react2.default.createElement(_reactNative.Text,{style:styles.name},user.username),_react2.default.createElement(_reactNative.Text,null,user.status),_react2.default.createElement(_reactNativeMaterialDesign.Divider,null));
+}})))));
 
 
 
@@ -96315,10 +96362,10 @@ overlay:babelHelpers.extends({},
 absoluteStretch,{
 backgroundColor:'transparent'})});
 }, "react-native-side-menu/styles.js");
-__d(870 /* rally/src/panic.png */, function(global, require, module, exports) {module.exports = require(172 /* react-native/Libraries/Image/AssetRegistry */).registerAsset({"__packager_asset":true,"httpServerLocation":"/assets/src","width":512,"height":512,"scales":[1],"hash":"04257379974b0fed39052382d14a9b0b","name":"panic","type":"png"});
-}, "rally/src/panic.png");
 __d(865 /* rally/src/Welcome.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
 var _reactNative=require(44 /* react-native */);
+
+
 
 
 
@@ -96329,15 +96376,65 @@ var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
 var styles=_reactNative.StyleSheet.create({
 welcomeContainer:{
 flex:1,
-alignItems:'center'},
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'center'},
 
 title:{
+fontFamily:'verdana',
+fontStyle:'italic',
 fontWeight:'bold',
-color:'red',
+color:'#e62739',
 fontSize:100},
 
 subtitle:{
-color:'black'}});var
+textAlign:'center',
+color:'#6ed3cf'},
+
+triangle:{
+width:0,
+height:0,
+backgroundColor:'transparent',
+borderStyle:'solid',
+borderTopWidth:60,
+borderRightWidth:60,
+borderBottomWidth:0,
+borderLeftWidth:60,
+borderTopColor:'#9068be',
+borderRightColor:'transparent',
+borderBottomColor:'red',
+borderLeftColor:'transparent'},
+
+buttons:{
+flex:1,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'flex-start'},
+
+button1:{
+margin:10,
+width:200},
+
+button2:{
+margin:10,
+width:200},
+
+square:{
+width:50,
+height:50,
+backgroundColor:'red'},
+
+circle:{
+height:30,
+width:30,
+borderRadius:30},
+
+shapes:{
+flex:1,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'center'}});var
+
 
 
 
@@ -96346,11 +96443,23 @@ Welcome=function(_Component){babelHelpers.inherits(Welcome,_Component);function 
 
 {
 return(
+_react2.default.createElement(_reactNative.View,{style:{flex:1}},
 _react2.default.createElement(_reactNative.View,{style:styles.welcomeContainer},
 _react2.default.createElement(_reactNative.Text,{style:styles.title},'Rally'),
-_react2.default.createElement(_reactNative.Text,{style:styles.subtitle},'What would you like to do?'),
-_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Create a Group',raised:true,onPress:function onPress(){return _reactNativeRouterFlux.Actions.createGroup();}}),
-_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Join a Group',raised:true,onPress:function onPress(){return _reactNativeRouterFlux.Actions.joinGroup();}})));
+_react2.default.createElement(_reactNative.View,{style:styles.triangle})),
+
+
+_react2.default.createElement(_reactNative.View,{style:styles.buttons},
+_react2.default.createElement(_reactNative.View,{style:styles.button1},
+_react2.default.createElement(_reactNativeMaterialDesign.Button,{style:styles.button2,theme:'dark',text:'Create a Group',raised:true,onPress:function onPress(){return _reactNativeRouterFlux.Actions.createGroup();}})),
+
+_react2.default.createElement(_reactNative.View,{style:styles.button1},
+_react2.default.createElement(_reactNativeMaterialDesign.Button,{style:styles.button1,theme:'dark',text:'Join a Group',raised:true,onPress:function onPress(){return _reactNativeRouterFlux.Actions.joinGroup();}})),
+
+_react2.default.createElement(_reactNative.View,{style:styles.button1},
+_react2.default.createElement(_reactNative.Text,{style:styles.subtitle,onPress:function onPress(){return _reactNativeRouterFlux.Actions.about();}},'About Us')))));
+
+
 
 
 }}]);return Welcome;}(_react.Component);exports.default=Welcome;
@@ -96368,9 +96477,42 @@ var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
 var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
 
 var styles=_reactNative.StyleSheet.create({
+enter:{
+backgroundColor:'white',
+justifyContent:'center',
+borderColor:'#6ed3cf',
+borderWidth:1,
+margin:5},
+
+
+title:{
+fontFamily:'verdana',
+textDecorationLine:'underline',
+fontWeight:'bold',
+color:'#e62739',
+fontSize:60},
+
+header:{
+flex:1,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'center',
+textAlign:'center'},
+
+createContainer:{
+flex:2,
+
+backgroundColor:'#e1e8f0',
+justifyContent:'flex-start'},
+
+button:{
+marginLeft:40,
+marginRight:40},
+
 container:babelHelpers.extends({},
 _reactNative.StyleSheet.absoluteFillObject,{
 flex:1,
+width:50,
 justifyContent:'flex-end',
 alignItems:'center'}),
 
@@ -96429,10 +96571,17 @@ console.warn(e);
 
 {var _this4=this;
 return(
-_react2.default.createElement(_reactNative.View,null,
-_react2.default.createElement(_reactNative.TextInput,{placeholder:'Enter a group name.',onChangeText:function onChangeText(event){return _this4.setState({groupname:event});}}),
-_react2.default.createElement(_reactNative.TextInput,{placeholder:'Enter a user name.',onChangeText:function onChangeText(event){return _this4.setState({username:event});}}),
-_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Submit',raised:true,onPress:function onPress(){return _this4.sendData();}})));
+_react2.default.createElement(_reactNative.View,{style:{flex:1}},
+_react2.default.createElement(_reactNative.View,{style:styles.header},
+_react2.default.createElement(_reactNative.Text,{style:styles.title},'Create Group')),
+
+_react2.default.createElement(_reactNative.View,{style:styles.createContainer},
+_react2.default.createElement(_reactNative.TextInput,{style:styles.enter,placeholder:'Enter a group name.',onChangeText:function onChangeText(event){return _this4.setState({groupname:event});}}),
+_react2.default.createElement(_reactNative.TextInput,{style:styles.enter,placeholder:'Enter a user name.',onChangeText:function onChangeText(event){return _this4.setState({username:event});}}),
+_react2.default.createElement(_reactNative.View,{style:styles.button},
+_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Submit',theme:'dark',raised:true,onPress:function onPress(){return _this4.sendData();}})))));
+
+
 
 
 }}]);return CreateGroup;}(_react.Component);exports.default=CreateGroup;
@@ -96450,6 +96599,39 @@ var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
 var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
 
 var styles=_reactNative.StyleSheet.create({
+enter:{
+backgroundColor:'white',
+justifyContent:'center',
+borderColor:'#6ed3cf',
+
+borderWidth:1,
+margin:5},
+
+
+title:{
+fontFamily:'verdana',
+textDecorationLine:'underline',
+fontWeight:'bold',
+color:'#e62739',
+fontSize:60},
+
+header:{
+flex:1,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'center',
+textAlign:'center'},
+
+createContainer:{
+flex:2,
+
+backgroundColor:'#e1e8f0',
+justifyContent:'flex-start'},
+
+button:{
+marginLeft:40,
+marginRight:40},
+
 container:babelHelpers.extends({},
 _reactNative.StyleSheet.absoluteFillObject,{
 flex:1,
@@ -96511,14 +96693,106 @@ console.warn(e);
 
 {var _this4=this;
 return(
-_react2.default.createElement(_reactNative.View,null,
-_react2.default.createElement(_reactNative.TextInput,{placeholder:'Enter the group name.',onChangeText:function onChangeText(event){return _this4.setState({groupname:event});}}),
-_react2.default.createElement(_reactNative.TextInput,{placeholder:'Enter a user name.',onChangeText:function onChangeText(event){return _this4.setState({username:event});}}),
-_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Submit',raised:true,onPress:function onPress(){return _this4.sendData();}})));
+_react2.default.createElement(_reactNative.View,{style:{flex:1}},
+_react2.default.createElement(_reactNative.View,{style:styles.header},
+_react2.default.createElement(_reactNative.Text,{style:styles.title},'Join Group')),
+
+_react2.default.createElement(_reactNative.View,{style:styles.createContainer},
+_react2.default.createElement(_reactNative.TextInput,{style:styles.enter,placeholder:'Enter the group name.',onChangeText:function onChangeText(event){return _this4.setState({groupname:event});}}),
+_react2.default.createElement(_reactNative.TextInput,{style:styles.enter,placeholder:'Enter a user name.',onChangeText:function onChangeText(event){return _this4.setState({username:event});}}),
+_react2.default.createElement(_reactNative.View,{style:styles.button},
+_react2.default.createElement(_reactNativeMaterialDesign.Button,{text:'Submit',theme:'dark',raised:true,onPress:function onPress(){return _this4.sendData();}})))));
+
+
 
 
 }}]);return JoinGroup;}(_react.Component);exports.default=JoinGroup;
 }, "rally/src/JoinGroup.js");
+__d(872 /* rally/src/About.js */, function(global, require, module, exports) {Object.defineProperty(exports,"__esModule",{value:true});var _react=require(12 /* react */);var _react2=babelHelpers.interopRequireDefault(_react);
+var _reactNative=require(44 /* react-native */);
+
+
+
+
+
+
+var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
+var _reactNativeRouterFlux=require(817 /* react-native-router-flux */);
+
+var styles=_reactNative.StyleSheet.create({
+welcomeContainer:{
+flex:1,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'center'},
+
+title:{
+fontFamily:'verdana',
+textDecorationLine:'underline',
+fontWeight:'bold',
+color:'#e62739',
+fontSize:60},
+
+subtitle:{
+
+color:'#6ed3cf'},
+
+triangle:{
+width:0,
+height:0,
+backgroundColor:'transparent',
+borderStyle:'solid',
+borderTopWidth:60,
+borderRightWidth:60,
+borderBottomWidth:0,
+borderLeftWidth:60,
+borderTopColor:'#9068be',
+borderRightColor:'transparent',
+borderBottomColor:'red',
+borderLeftColor:'transparent'},
+
+buttons:{
+flex:2,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'flex-start'},
+
+button1:{
+margin:10,
+width:200},
+
+square:{
+width:50,
+height:50,
+backgroundColor:'red'},
+
+circle:{
+height:30,
+width:30,
+borderRadius:30},
+
+shapes:{
+flex:1,
+alignItems:'center',
+backgroundColor:'#e1e8f0',
+justifyContent:'center'}});var
+
+
+
+
+
+About=function(_Component){babelHelpers.inherits(About,_Component);function About(){babelHelpers.classCallCheck(this,About);return babelHelpers.possibleConstructorReturn(this,(About.__proto__||Object.getPrototypeOf(About)).apply(this,arguments));}babelHelpers.createClass(About,[{key:'render',value:function render()
+
+{
+return(
+_react2.default.createElement(_reactNative.View,{style:{flex:1}},
+_react2.default.createElement(_reactNative.View,{style:styles.welcomeContainer},
+_react2.default.createElement(_reactNative.Text,{style:styles.title},'About Us'))));
+
+
+
+}}]);return About;}(_react.Component);exports.default=About;
+}, "rally/src/About.js");
 ;require(195);
 ;require(0);
 //# sourceMappingURL=/index.android.map?platform=android
