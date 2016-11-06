@@ -5,7 +5,7 @@ import {
   View
 } from 'react-native';
 import MapView from 'react-native-maps'
-import { Button, Card } from 'react-native-material-design'
+import { Button } from 'react-native-material-design'
 
 import { Router, Scene, Actions } from 'react-native-router-flux'
 
@@ -30,7 +30,13 @@ export default class Main extends Component {
       lon: this.props.lon
     };
     this.update = this.update.bind(this)
+    this.updateGroup = this.updateGroup.bind(this)
     setInterval(this.update, 60000)
+    setInterval(this.updateGroup, 60000)
+  }
+
+  componentDidMount() {
+    this.updateGroup()
   }
 
   update() {
@@ -55,6 +61,9 @@ export default class Main extends Component {
       (error) => alert(JSON.stringify(error)),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );
+  }
+
+  updateGroup() {
     fetch("http://rallyserver.herokuapp.com/update_group", {
       method: "POST",
       headers: {
@@ -65,9 +74,10 @@ export default class Main extends Component {
         groupname: this.props.groupname
       })
     })
-    .then(response => response._bodyInit)
-    .then(users => this.setState({users: users}))
+    .then(response => JSON.parse(response._bodyInit))
+    .then(data => this.setState({users: data}))
     .catch(e => console.warn("here", JSON.stringify(e)))
+    .done()
   }
 
  render() {
@@ -88,13 +98,16 @@ export default class Main extends Component {
               description="You are here."
               pinColor="ffff22"
             />
-          {this.state.users.map(user => (
-              <MapView.Marker
-                coordinate={{latitude: user.lat, longitude: user.lon}}
-                title={user.username}
-                description={user.status}
-              />
-            ))}
+          {Object.keys(this.state.users).map(user => {
+              if (user !== this.props.username) {
+              return (<MapView.Marker
+                coordinate={{latitude: this.state.users[user].lat, longitude: this.state.users[user].lon}}
+                title={user}
+                description={this.state.users[user].status}
+              />)
+            }
+            }
+            )}
        </MapView>
      </View>
    );

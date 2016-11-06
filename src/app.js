@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  ToolbarAndroid
 } from 'react-native';
 import MapView from 'react-native-maps'
 import { Button, Card } from 'react-native-material-design'

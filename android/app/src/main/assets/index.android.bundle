@@ -81905,6 +81905,7 @@ var _reactNative=require(44 /* react-native */);
 
 
 
+
 var _reactNativeMaps=require(653 /* react-native-maps */);var _reactNativeMaps2=babelHelpers.interopRequireDefault(_reactNativeMaps);
 var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
 
@@ -95818,6 +95819,7 @@ var _reactNative=require(44 /* react-native */);
 
 
 
+
 var _reactNativeMaps=require(653 /* react-native-maps */);var _reactNativeMaps2=babelHelpers.interopRequireDefault(_reactNativeMaps);
 var _reactNativeMaterialDesign=require(664 /* react-native-material-design */);
 
@@ -95844,8 +95846,14 @@ lat:_this.props.lat,
 lon:_this.props.lon};
 
 _this.update=_this.update.bind(_this);
-setInterval(_this.update,60000);return _this;
-}babelHelpers.createClass(Main,[{key:'update',value:function update()
+_this.updateGroup=_this.updateGroup.bind(_this);
+setInterval(_this.update,60000);
+setInterval(_this.updateGroup,60000);return _this;
+}babelHelpers.createClass(Main,[{key:'componentDidMount',value:function componentDidMount()
+
+{
+this.updateGroup();
+}},{key:'update',value:function update()
 
 {var _this2=this;
 navigator.geolocation.getCurrentPosition(
@@ -95869,6 +95877,9 @@ catch(function(e){return console.warn(JSON.stringify(e));});
 function(error){return alert(JSON.stringify(error));},
 {enableHighAccuracy:true,timeout:20000,maximumAge:1000});
 
+}},{key:'updateGroup',value:function updateGroup()
+
+{var _this3=this;
 fetch("http://rallyserver.herokuapp.com/update_group",{
 method:"POST",
 headers:{
@@ -95879,14 +95890,18 @@ body:JSON.stringify({
 groupname:this.props.groupname})}).
 
 
-then(function(response){return response._bodyInit;}).
-then(function(users){return _this2.setState({users:users});}).
-catch(function(e){return console.warn("here",JSON.stringify(e));});
+then(function(response){return JSON.parse(response._bodyInit);}).
+then(function(data){return _this3.setState({users:data});}).
+catch(function(e){return console.warn("here",JSON.stringify(e));}).
+done();
 }},{key:'render',value:function render()
 
-{
+{var _this4=this;
 return(
 _react2.default.createElement(_reactNative.View,{style:styles.container},
+_react2.default.createElement(_reactNative.ToolbarAndroid,{
+title:'Rally!',
+actions:[{title:'Settings',show:'always'}]}),
 _react2.default.createElement(_reactNativeMaps2.default,{
 style:styles.map,
 region:{
@@ -95902,12 +95917,15 @@ title:this.props.username,
 description:'You are here.',
 pinColor:'ffff22'}),
 
-this.state.users.map(function(user){return(
-_react2.default.createElement(_reactNativeMaps2.default.Marker,{
-coordinate:{latitude:user.lat,longitude:user.lon},
-title:user.username,
-description:user.status}));}))));
+Object.keys(this.state.users).map(function(user){
+if(user!==_this4.props.username){
+return _react2.default.createElement(_reactNativeMaps2.default.Marker,{
+coordinate:{latitude:_this4.state.users[user].lat,longitude:_this4.state.users[user].lon},
+title:user,
+description:_this4.state.users[user].status});
 
+}
+}))));
 
 
 
