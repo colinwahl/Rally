@@ -11,9 +11,25 @@ import { Button, Card } from 'react-native-material-design'
 import { Actions } from 'react-native-router-flux'
 
 const styles = StyleSheet.create({
+  enter:{
+    backgroundColor:'white',
+    justifyContent:'center',
+    borderColor: 'gray',
+    color:'red',
+    borderWidth: 1,
+    margin:5
+
+  },
+  createContainer:{
+    flex:1,
+//    alignItems: 'center',
+    backgroundColor: '#e1e8f0',
+    justifyContent:'center'
+  },
   container: {
     ...StyleSheet.absoluteFillObject,
     flex: 1,
+    width:50,
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
@@ -72,9 +88,9 @@ export default class CreateGroup extends Component {
 
   render() {
     return (
-      <View>
-        <TextInput placeholder="Enter a group name." onChangeText={(event) => this.setState({groupname: event})} />
-        <TextInput placeholder="Enter a user name." onChangeText={(event) => this.setState({username: event})} />
+      <View style={styles.createContainer}>
+        <TextInput style={styles.enter} placeholder="Enter a group name." onChangeText={(event) => this.setState({groupname: event})} />
+        <TextInput style={styles.enter} placeholder="Enter a user name." onChangeText={(event) => this.setState({username: event})} />
         <Button text="Submit" raised={true} onPress={()=> this.sendData()} />
       </View>
     )
